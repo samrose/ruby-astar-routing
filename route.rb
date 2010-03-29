@@ -20,12 +20,11 @@ EstimateEvaluator = Java::org.neo4j.graphalgo.shortestpath.EstimateEvaluator
 
 #implements a Java Interface
 class GeoCostEvaluator
-  include org.neo4j.graphalgo.shortestpath.EstimateEvaluator
+  include EstimateEvaluator
   def getCost(node, goal)
     distance(node.getProperty("lat"), node.getProperty("lon"), goal.getProperty("lat"),goal.getProperty("lon"))
   end
 end
-
 
 #calculates a geodetic distance between two spatial points
 def distance(start_lat, start_lon, other_lat, other_lon)
@@ -57,16 +56,16 @@ end
 class Waypoint
   include Neo4j::NodeMixin
   
-  #neo4j node properties
+  # neo4j node properties
   property :lat, :lon, :name
   
-  #lucene indexed node properties
+  # lucene indexed node properties
   index :name
   
-  #relationships to other waypoints
+  # relationships to other waypoints
   has_n(:road).to(Waypoint).relationship(Road)
   
-  #ight now just calculate the straight distance between points as cost
+  # for this example just calculate the straight distance between points as cost
   def connect(other)
     self.road.new(other).update(:cost => distance(self.lat, self.lon, other.lat, other.lon))
   end
@@ -75,7 +74,7 @@ class Waypoint
   end
 end
 
-#create point, and look up the locatoin via Yahoo! MapsService
+# create point, and look up the location via Yahoo! MapsService
 def create_waypoint(city, state)
   url = "http://local.yahooapis.com/MapsService/V1/geocode?appid=#{APP_ID}"
   res = Net::HTTP.get(URI.parse( URI.escape(url + "&state=#{state}&city=#{city}") ))
@@ -87,7 +86,7 @@ def create_waypoint(city, state)
   point
 end
 
-#populating the routing test
+# populating the routing test
 Neo4j::Transaction.run do
   NYC = create_waypoint('New York', 'New York')
   KAN = create_waypoint('Kansas City', 'Kansas')
@@ -101,9 +100,7 @@ Neo4j::Transaction.run do
   SFE.connect(SF)
 end
 
-#Finding the route
-
-#Java classes used
+# Finding the route
 sp = AStar.new( Neo4j::instance, RelationshipExpander.forTypes( DynamicRelationshipType.withName('Waypoint#road'), Direction::BOTH),
 				        DoubleEvaluator.new("cost") , GeoCostEvaluator.new)
 path = sp.findSinglePath(NYC._java_node, SF._java_node)

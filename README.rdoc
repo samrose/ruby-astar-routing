@@ -1,5 +1,11 @@
-= Mini Routing Example with Neo4j
-this is a small routing example, populating a Neo4j node space witha  couple of towns using the Yahoo! geocoding service, and then doing a A* routing on it.
+= Simple Routing Example with Neo4j
+This is a small routing example, populating a Neo4j node space with a
+couple of towns using the Yahoo! geocoding service, and then doing a A* routing on it.
+
+= Requirements
+Java, JRuby and the JRuby Neo4j wrapper has to be installed, see:
+http://github.com/andreasronge/neo4j
+
 = Running
 
 	myComputer$ rm -rf tmp/ && jruby route.rb 
